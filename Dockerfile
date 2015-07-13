@@ -1,26 +1,21 @@
-FROM phusion/passenger-ruby22:0.9.15
+FROM jruby:9.0.0.0.rc2-jdk
 
-# Set correct environment variables.
-ENV HOME /root
-
-# Use baseimage-docker's init process.
-CMD ["/sbin/my_init"]
+# Setup the app user
+RUN groupadd -r app && useradd -r -g app app
 
 # Copy code
 ADD . /home/app/hello-sinatra
+RUN chown -R app:app /usr/local/bundle
 RUN chown -R app:app /home/app/
-RUN gem install bundler
+
+# Clean up APT when done.
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Setup app
 USER app
 WORKDIR /home/app/hello-sinatra
 RUN bundle install --binstubs --deployment --without test development
 
-USER root
-RUN mkdir /etc/service/thin
-ADD thin.sh /etc/service/thin/run
-
 EXPOSE 3000
 
-# Clean up APT when done.
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+ENTRYPOINT bundle exec jruby app.rb -s Puma -p 3000 -o 0.0.0.0
