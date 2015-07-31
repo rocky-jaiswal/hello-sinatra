@@ -1,0 +1,25 @@
+{
+  "id": "hello-sinatra",
+  "cpus": 1,
+  "mem": 1024.0,
+  "instances": 1,
+  "container": {
+  "type": "DOCKER",
+  "docker": {
+    "image": "rockyj/hello-sinatra",
+    "network": "BRIDGE",
+    "portMappings": [
+       { "containerPort": 3000, "hostPort": 0, "servicePort": 9000, "protocol": "tcp" }
+      ]}
+   },
+  "healthChecks": [ 
+    {
+       "protocol": "HTTP",
+       "portIndex": 0,
+       "path": "/greet/health",
+       "gracePeriodSeconds": 5,
+       "intervalSeconds": 20,
+       "maxConsecutiveFailures": 3
+    }
+  ]
+}
